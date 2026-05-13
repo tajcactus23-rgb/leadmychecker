@@ -1,6 +1,8 @@
-name: Build Release
+name: Build EXE
 
 on:
+  push:
+    branches: [main]
   release:
     types: [created]
 
@@ -16,13 +18,19 @@ jobs:
           python-version: '3.11'
           
       - name: Install dependencies
-        run: |
-          pip install pyinstaller selenium webdriver-manager
-          
-      - name: Build EXE
-        run: pyinstaller --onefile --name lotterywest_checker lotterywest_checker.py
+        run: pip install pyinstaller selenium webdriver-manager
         
-      - name: Upload Release Asset
+      - name: Build EXE
+        run: pyinstaller --onefile --name lotterywest_checker lotterywest_checker.py --console
+        
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lotterywest_checker.exe
+          path: dist/lotterywest_checker
+          
+      - name: Upload to Release
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
           files: dist/lotterywest_checker
