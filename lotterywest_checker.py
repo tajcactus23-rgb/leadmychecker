@@ -181,38 +181,99 @@ class LotterywestChecker:
             
             # LOOK FOR NEW FIELDS - Navigate to wallet tab
             try:
-                wallet_tab = self.find_element(['a[href*="wallet"]', 'button:contains("Wallet")'])
-                if wallet_tab:
-                    wallet_tab.click()
-                    time.sleep(1.5)
-                    wallet_html = self.driver.page_source
+                # Try to find and click wallet link
+                wallet_links = self.find_element(['a[href*="wallet"]', 'a[href*="/wallet"]', 'button:contains("Wallet")', 'nav a:contains("Wallet")'])
+                if wallet_links:
+                    wallet_links.click()
+                else:
+                    # Try direct URL
+                    self.driver.get("https://play.lotterywest.wa.gov.au/wallet")
+                time.sleep(2)
+                wallet_html = self.driver.page_source
+                
+                # Debug - save wallet page for inspection
+                try:
+                    with open("/tmp/wallet_debug.html", "w") as f:
+                        f.write(wallet_html)
+                    print("Saved wallet page to /tmp/wallet_debug.html")
+                except:
+                    pass
+                
+                # Current Balance - MORE AGGRESSIVE PATTERN - look for large dollar amounts
+                balance_patterns = [
+                    r'(?i)Current\s*Balance[^$]*\$([\d,]+\.?\d*)',
+                    r'(?i)Balance[^:]*:\s*\$?([\d,]+\.?\d*)',
+                    r'(?i)\$([\d,]+\.\d{2})(?:\s|$)',
+                    r'\$\s*([\d]{1,3}(?:,\d{3})*\.\d{2})',
+                ]
+                for p in balance_patterns:
+                    m = re.search(p, wallet_html)
+                    if m:
+                        amt = m.group(1)
+                        # Filter out small amounts like .95 or spend limits
+                        if float(amt.replace(",","")) > 1:
+                            data["balance"]["current"] = amt
+                            print(f"Found balance: ${amt}")
+                            break
+                
+                # Weekly online spend limit
+                weekly_match = re.search(r'(?i)Weekly\s*(?:online\s*)?spend\s*limit[:\s]*\$?([\d,]+\.?\d*)', wallet_html)
+                if weekly_match:
+                    data["balance"]["weekly_spend_limit"] = weekly_match.group(1)
+                
+                # Total spending (last 12 months)
+                spend_patterns = [
+                    r'(?i)Total\s*spending[^$]*\$([\d,]+\.?\d*)',
+                    r'(?i)Spending.*?12.*?\$([\d,]+\.?\d*)',
+                ]
+                for p in spend_patterns:
+                    m = re.search(p, wallet_html)
+                    if m:
+                        data["totals"]["total_spending"] = m.group(1)
+                        break
+                
+                # Total winnings (last 12 months)  
+                win_patterns = [
+                    r'(?i)Total\s*winnings[^$]*\$([\d,]+\.?\d*)',
+                    r'(?i)Winnings.*?12.*?\$([\d,]+\.?\d*)',
+                ]
+                for p in win_patterns:
+                    m = re.search(p, wallet_html)
+                    if m:
+                        data["totals"]["total_winnings"] = m.group(1)
+                        break
+                
+                # Last deposit
+                deposit_match = re.search(r'(?i)Last\s*deposit.*?\$([\d,]+\.?\d*)', wallet_html)
+                if deposit_match:
+                    data["totals"]["last_deposit"] = deposit_match.group(1)
+                
+                # Deposit method
+                if "paypal" in wallet_html.lower():
+                    data["totals"]["last_deposit_method"] = "PayPal"
+                elif "card" in wallet_html.lower():
+                    data["totals"]["last_deposit_method"] = "Card"
+                
+                # Current draws/tickets
+                draws_match = re.search(r'(\d+)\s*(?i)current\s*(?:draw|ticket)', wallet_html)
+                if draws_match:
+                    data["tickets"] = [{"current_draws": draws_match.group(1)}]
+                
+                # Check for PayPal
+                if "paypal" in wallet_html.lower() or "PayPal" in wallet_html:
+                    data["payment_methods"]["paypal"] = True
                     
-                    # Weekly online spend limit - CRITICAL
-                    weekly_match = re.search(r'(?i)Weekly\s*(?:online\s*)?spend\s*limit[:\s]*\$?([\d,]+\.?\d*)', wallet_html)
-                    if weekly_match:
-                        data["balance"]["weekly_spend_limit"] = weekly_match.group(1)
-                    
-                    # Current Balance - CRITICAL
-                    balance_match = re.search(r'(?i)(?:current\s*)?balance[:\s]*\$?([\d,]+\.?\d*)', wallet_html)
-                    if balance_match:
-                        data["balance"]["current"] = balance_match.group(1)
-                    
-                    # Check for PayPal - CRITICAL
-                    if "paypal" in wallet_html.lower() or "PayPal" in wallet_html:
-                        data["payment_methods"]["paypal"] = True
+                # Look for payment cards
+                visa_match = re.findall(r' Visa [\d\*]+(\d{4})', wallet_html)
+                mc_match = re.findall(r' Mastercard [\d\*]+(\d{4})', wallet_html)
+                card_nums = visa_match + mc_match
+                if card_nums:
+                    data["payment_methods"]["cards"] = card_nums
+                else:
+                    any_card = re.search(r'(\d{4}[\s*]+\d{4})', wallet_html)
+                    if any_card:
+                        data["payment_methods"]["cards"] = [any_card.group(1)]
                         
-                    # Look for payment cards - CRITICAL
-                    visa_match = re.findall(r' Visa [\d\*]+(\d{4})', wallet_html)
-                    mc_match = re.findall(r' Mastercard [\d\*]+(\d{4})', wallet_html)
-                    card_nums = visa_match + mc_match
-                    if card_nums:
-                        data["payment_methods"]["cards"] = card_nums
-                    else:
-                        # Try masked pattern
-                        any_card = re.search(r'(\d{4}[\s*]+\d{4})', wallet_html)
-                        if any_card:
-                            data["payment_methods"]["cards"] = [any_card.group(1)]
-                            
             except Exception as e:
                 print(f"Wallet tab error: {e}")
             
