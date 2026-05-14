@@ -93,6 +93,33 @@
             z-index: 0;
         }
 
+        .stars-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: starFloat 8s ease-in-out infinite;
+        }
+
+        .star.glow {
+            width: 4px;
+            height: 4px;
+            box-shadow: 0 0 6px white, 0 0 12px var(--accent-cyan);
+        }
+
+        @keyframes starFloat {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+            50% { transform: translateY(-30px) scale(1.2); opacity: 1; }
+        }
+
         .neuron {
             position: absolute;
             width: 4px;
@@ -413,8 +440,6 @@
             height: 280px;
             border-color: rgba(0, 217, 255, 0.3);
             animation-duration: 30s;
-            border-top-color: var(--accent-cyan);
-            border-bottom-color: var(--accent-magenta);
         }
 
         .core-ring.middle {
@@ -423,10 +448,6 @@
             border-color: rgba(168, 85, 247, 0.4);
             animation-duration: 20s;
             animation-direction: reverse;
-            border-top-color: var(--accent-purple);
-            border-bottom-color: var(--accent-green);
-            border-left-color: var(--accent-yellow);
-            border-right-color: var(--accent-red);
         }
 
         .core-ring.inner {
@@ -434,10 +455,6 @@
             height: 160px;
             border-color: rgba(255, 0, 170, 0.5);
             animation-duration: 12s;
-            border-top-color: var(--accent-cyan);
-            border-bottom-color: var(--accent-magenta);
-            border-left-color: var(--accent-purple);
-            border-right-color: var(--accent-green);
         }
 
         @keyframes ringRotate {
@@ -458,71 +475,6 @@
             justify-content: center;
             box-shadow: var(--glow-cyan), inset 0 0 30px rgba(0, 217, 255, 0.1);
             z-index: 2;
-            animation: glow 3s ease-in-out infinite;
-            overflow: hidden;
-        }
-
-        /* Neural Brain */
-        .brain-bg {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .neural-canvas {
-            position: absolute;
-            inset: 0;
-            width: 140px;
-            height: 140px;
-        }
-
-        .neural-net {
-            position: relative;
-            width: 100%;
-            height: 100%;
-        }
-
-        .net-node {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: var(--accent-cyan);
-            border-radius: 50%;
-            box-shadow: 0 0 8px var(--accent-cyan);
-            animation: nodeFloat 4s ease-in-out infinite;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .net-node:hover {
-            width: 10px;
-            height: 10px;
-            background: var(--accent-magenta);
-            box-shadow: 0 0 15px var(--accent-magenta);
-        }
-
-        .net-line {
-            position: absolute;
-            height: 1px;
-            background: linear-gradient(90deg, var(--accent-cyan), transparent);
-            transform-origin: left center;
-            opacity: 0.4;
-            animation: linePulse 2s ease-in-out infinite;
-        }
-
-        @keyframes nodeFloat {
-            0%, 100% { transform: translate(0, 0); opacity: 0.6; }
-            25% { transform: translate(5px, -8px); opacity: 1; }
-            50% { transform: translate(-3px, 5px); opacity: 0.8; }
-            75% { transform: translate(-6px, -4px); opacity: 1; }
-        }
-
-        @keyframes linePulse {
-            0%, 100% { opacity: 0.2; }
-            50% { opacity: 0.6; }
         }
 
         .core-icon {
@@ -1113,6 +1065,7 @@
     <div class="bg-grid"></div>
     <div class="bg-circuits" id="circuits"></div>
     <div class="neural-bg" id="neurons"></div>
+    <div class="stars-bg" id="stars"></div>
 
     <div class="app-container">
         <!-- Header -->
@@ -1285,10 +1238,8 @@
                 </div>
                 
                 <div class="core-center glow-pulse" id="neuralCore">
-                    <div class="brain-bg">
-                        <canvas class="neural-canvas" id="neuralCanvas"></canvas>
-                    </div>
-                    <div class="core-label">BLUEMEANIE23</div>
+                    <div class="core-icon">🧠</div>
+                    <div class="core-label">Neural Core</div>
                 </div>
             </div>
 
@@ -1475,6 +1426,20 @@
                 neuron.style.top = Math.random() * 100 + '%';
                 neuron.style.animationDelay = Math.random() * 2 + 's';
                 neurons.appendChild(neuron);
+            }
+        }
+
+        // Initialize stars - floating glow stars everywhere
+        function initStars() {
+            const stars = document.getElementById('stars');
+            for (let i = 0; i < 80; i++) {
+                const star = document.createElement('div');
+                star.className = 'star' + (Math.random() > 0.7 ? ' glow' : '');
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 8 + 's';
+                star.style.animationDuration = (4 + Math.random() * 8) + 's';
+                stars.appendChild(star);
             }
         }
 
@@ -1832,9 +1797,9 @@
                             secondary_phone: '*********330'
                         },
                         balance: {
-                            current: '0.95',
-                            available: '0.95',
-                            spend_limit: '0.95',
+                            current: '0.00',
+                            available: '0.00',
+                            spend_limit: '500.00',
                             weekly_spend_limit: '500'
                         },
                         payment_methods: {
@@ -1937,6 +1902,7 @@
         // Initialize
         initCircuits();
         initNeurons();
+        initStars();
         animateCore();
         updateStats();
         
@@ -1949,97 +1915,6 @@
             document.getElementById('cpuUsage').textContent = Math.floor(Math.random() * 30 + 10) + '%';
             document.getElementById('ramUsage').textContent = Math.floor(Math.random() * 20 + 30) + '%';
         }, 3000);
-    </script>
-    <!-- Neural Network Animation -->
-    <script>
-        class NeuralNetwork {
-            constructor(canvasId) {
-                this.canvas = document.getElementById(canvasId);
-                this.ctx = this.canvas.getContext('2d');
-                this.particles = [];
-                this.connections = [];
-                this.init();
-            }
-
-            init() {
-                const rect = this.canvas.parentElement.getBoundingClientRect();
-                this.canvas.width = rect.width;
-                this.canvas.height = rect.height;
-                
-                // Create particles
-                for (let i = 0; i < 12; i++) {
-                    this.particles.push({
-                        x: Math.random() * this.canvas.width,
-                        y: Math.random() * this.canvas.height,
-                        vx: (Math.random() - 0.5) * 0.8,
-                        vy: (Math.random() - 0.5) * 0.8,
-                        size: 2 + Math.random() * 3,
-                        color: ['#00d9ff', '#ff00aa', '#a855f7', '#00ff88'][Math.floor(Math.random() * 4)],
-                        delay: Math.random() * 2
-                    });
-                }
-                
-                this.animate();
-            }
-
-            animate() {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                
-                // Update particles
-                this.particles.forEach((p, i) => {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    
-                    // Bounce
-                    if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
-                    if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
-                    
-                    // Draw
-                    this.ctx.beginPath();
-                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    this.ctx.fillStyle = p.color;
-                    this.ctx.shadowBlur = 10;
-                    this.ctx.shadowColor = p.color;
-                    this.ctx.fill();
-                });
-                
-                // Draw connections
-                this.particles.forEach((p1, i) => {
-                    this.particles.slice(i + 1).forEach(p2 => {
-                        const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
-                        if (dist < 60) {
-                            this.ctx.beginPath();
-                            this.ctx.moveTo(p1.x, p1.y);
-                            this.ctx.lineTo(p2.x, p2.y);
-                            this.ctx.strokeStyle = `rgba(0, 217, 255, ${0.3 * (1 - dist / 60)})`;
-                            this.ctx.lineWidth = 1;
-                            this.ctx.stroke();
-                        }
-                    });
-                });
-                
-                requestAnimationFrame(() => this.animate());
-            }
-        }
-
-        // Interactive mouse interaction
-        let mouseX = 0, mouseY = 0;
-        document.addEventListener('mousemove', (e) => {
-            const core = document.getElementById('neuralCore');
-            if (core) {
-                const rect = core.getBoundingClientRect();
-                mouseX = (e.clientX - rect.left) / rect.width;
-                mouseY = (e.clientY - rect.top) / rect.height;
-            }
-        });
-
-        // Initialize on load
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const canvas = document.getElementById('neuralCanvas');
-                if (canvas) new NeuralNetwork('neuralCanvas');
-            }, 100);
-        });
     </script>
 </body>
 </html>
