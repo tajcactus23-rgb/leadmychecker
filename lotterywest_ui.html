@@ -1782,41 +1782,44 @@
             
             updateStats();
             
-            // Simulate API call (replace with real backend)
-            setTimeout(() => {
-                // Simulated result (replace with real data from backend)
-                const mockResult = {
+            // Call real backend API
+            const response = await fetch('/check', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
                     email: account.email,
                     password: account.password,
-                    status: Math.random() > 0.3 ? 'VALID' : 'INVALID',
-                    data: {
-                        profile: {
-                            name: 'gemma',
-                            email: account.email,
-                            preferred_phone: '*********330',
-                            secondary_phone: '*********330'
-                        },
-                        balance: {
-                            current: '0.00',
-                            available: '0.00',
-                            spend_limit: '500.00',
-                            weekly_spend_limit: '500'
-                        },
-                        payment_methods: {
-                            paypal: true,
-                            cards: ['****1234']
-                        },
-                        withdrawal_bank: {
-                            bsb: '036-123',
-                            set: true
-                        },
-                        bank_accounts: [],
-                        totals: {
-                            total_won: '0.00',
-                            total_deposited: '0.00'
+                    task_id: `task_${Date.now()}`
+                })
+            });
+            
+            let mockResult;
+            if (response.ok) {
+                const data = await response.json();
+                // Poll for result
+                mockResult = await new Promise(resolve => {
+                    let attempts = 0;
+                    const poll = setInterval(async () => {
+                        attempts++;
+                        try {
+                            const r = await fetch(`/result/${data.task_id}`);
+                            if (r.ok) {
+                                const d = await r.json();
+                                if (d.status !== 'pending') {
+                                    clearInterval(poll);
+                                    resolve(d);
+                                }
+                            }
+                        } catch(e) {}
+                        if (attempts > 60) {
+                            clearInterval(poll);
+                            resolve({status: 'TIMEOUT', email: account.email});
                         }
-                    }
-                };
+                    }, 500);
+                });
+            } else {
+                mockResult = {status: 'ERROR', email: account.email};
+            }
                 
                 state.results.push(mockResult);
                 state.activeThreads = Math.max(0, state.activeThreads - 1);
@@ -1852,7 +1855,7 @@
                     document.getElementById('statusText').textContent = 'Completed';
                     log(`Completed! ${state.validCount} valid, ${state.invalidCount} invalid`, 'success');
                 }
-            }, 1500);
+            
         }
 
         // Reduced motion toggle
