@@ -469,17 +469,60 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0.25;
+            overflow: hidden;
         }
 
-        .brain-icon {
-            font-size: 55px;
-            animation: brainThink 2s ease-in-out infinite;
+        .neural-canvas {
+            position: absolute;
+            inset: 0;
+            width: 140px;
+            height: 140px;
         }
 
-        @keyframes brainThink {
-            0%, 100% { opacity: 0.3; transform: scale(0.92); }
-            50% { opacity: 0.7; transform: scale(1); }
+        .neural-net {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .net-node {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent-cyan);
+            animation: nodeFloat 4s ease-in-out infinite;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .net-node:hover {
+            width: 10px;
+            height: 10px;
+            background: var(--accent-magenta);
+            box-shadow: 0 0 15px var(--accent-magenta);
+        }
+
+        .net-line {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, var(--accent-cyan), transparent);
+            transform-origin: left center;
+            opacity: 0.4;
+            animation: linePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes nodeFloat {
+            0%, 100% { transform: translate(0, 0); opacity: 0.6; }
+            25% { transform: translate(5px, -8px); opacity: 1; }
+            50% { transform: translate(-3px, 5px); opacity: 0.8; }
+            75% { transform: translate(-6px, -4px); opacity: 1; }
+        }
+
+        @keyframes linePulse {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.6; }
         }
 
         .core-icon {
@@ -1242,8 +1285,9 @@
                 </div>
                 
                 <div class="core-center glow-pulse" id="neuralCore">
-                    <div class="brain-bg"><div class="brain-icon">🧠</div></div>
-                    <div class="core-icon">🧠</div>
+                    <div class="brain-bg">
+                        <canvas class="neural-canvas" id="neuralCanvas"></canvas>
+                    </div>
                     <div class="core-label">BLUEMEANIE23</div>
                 </div>
             </div>
@@ -1905,6 +1949,97 @@
             document.getElementById('cpuUsage').textContent = Math.floor(Math.random() * 30 + 10) + '%';
             document.getElementById('ramUsage').textContent = Math.floor(Math.random() * 20 + 30) + '%';
         }, 3000);
+    </script>
+    <!-- Neural Network Animation -->
+    <script>
+        class NeuralNetwork {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.connections = [];
+                this.init();
+            }
+
+            init() {
+                const rect = this.canvas.parentElement.getBoundingClientRect();
+                this.canvas.width = rect.width;
+                this.canvas.height = rect.height;
+                
+                // Create particles
+                for (let i = 0; i < 12; i++) {
+                    this.particles.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * this.canvas.height,
+                        vx: (Math.random() - 0.5) * 0.8,
+                        vy: (Math.random() - 0.5) * 0.8,
+                        size: 2 + Math.random() * 3,
+                        color: ['#00d9ff', '#ff00aa', '#a855f7', '#00ff88'][Math.floor(Math.random() * 4)],
+                        delay: Math.random() * 2
+                    });
+                }
+                
+                this.animate();
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Update particles
+                this.particles.forEach((p, i) => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    
+                    // Bounce
+                    if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
+                    if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
+                    
+                    // Draw
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.shadowBlur = 10;
+                    this.ctx.shadowColor = p.color;
+                    this.ctx.fill();
+                });
+                
+                // Draw connections
+                this.particles.forEach((p1, i) => {
+                    this.particles.slice(i + 1).forEach(p2 => {
+                        const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+                        if (dist < 60) {
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(p1.x, p1.y);
+                            this.ctx.lineTo(p2.x, p2.y);
+                            this.ctx.strokeStyle = `rgba(0, 217, 255, ${0.3 * (1 - dist / 60)})`;
+                            this.ctx.lineWidth = 1;
+                            this.ctx.stroke();
+                        }
+                    });
+                });
+                
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // Interactive mouse interaction
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (e) => {
+            const core = document.getElementById('neuralCore');
+            if (core) {
+                const rect = core.getBoundingClientRect();
+                mouseX = (e.clientX - rect.left) / rect.width;
+                mouseY = (e.clientY - rect.top) / rect.height;
+            }
+        });
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const canvas = document.getElementById('neuralCanvas');
+                if (canvas) new NeuralNetwork('neuralCanvas');
+            }, 100);
+        });
     </script>
 </body>
 </html>
