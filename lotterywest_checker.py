@@ -211,7 +211,7 @@ class LotterywestChecker:
                     if m:
                         amt = m.group(1)
                         # Filter out small amounts like .95 or spend limits
-                        if float(amt.replace(",","")) > 1:
+                        if float(amt.replace(",","")) >= 0:
                             data["balance"]["current"] = amt
                             print(f"Found balance: ${amt}")
                             break
