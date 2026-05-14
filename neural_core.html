@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOTTERYWEST NEURAL CORE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #030308;
+            --bg-panel: #0a0f18;
+            --bg-glass: rgba(10, 20, 40, 0.7);
+            --border: #0a3050;
+            --cyan: #00f0ff;
+            --cyan-dim: #006080;
+            --blue: #0066ff;
+            --blue-deep: #001540;
+            --magenta: #ff00aa;
+            --gold: #ffd700;
+            --green: #00ff88;
+            --green-glow: #00ffaa;
+            --amber: #ffaa00;
+            --red: #ff3366;
+            --orange: #ff6600;
+            --white: #e0f0ff;
+            --gray: #404060;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+        @keyframes glow { 0%,100% { filter: drop-shadow(0 0 5px var(--cyan)); } 50% { filter: drop-shadow(0 0 20px var(--cyan)); } }
+        @keyframes circuitFlow { 0% { stroke-dashoffset: 100; } 100% { stroke-dashoffset: 0; } }
+        @keyframes nodePulse { 0%,100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.3); opacity: 1; } }
+        @keyframes dataPacket { 0% { offset-distance: 0%; opacity: 1; } 100% { offset-distance: 100%; opacity: 0; } }
+        @keyframes breathing { 0%,100% { opacity: 0.3; } 50% { opacity: 0.6; } }
+        @keyframes glitch { 0%,100% { transform: translate(0); } 20% { transform: translate(-2px,1px); } 40% { transform: translate(2px,-1px); } 60% { transform: translate(-1px,2px); } }
+        @keyframes sparkle { 0%,100% { opacity: 0; transform: scale(0); } 50% { opacity: 1; transform: scale(1); } }
+        @keyframes ringSpin { 100% { transform: rotate(360deg); } }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: var(--bg-deep);
+            color: var(--white);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ========== NEURAL CORE BACKGROUND ========== */
+        .neural-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        /* Grid base */
+        .grid-base {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(var(--cyan-dim) 1px, transparent 1px),
+                linear-gradient(90deg, var(--cyan-dim) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.15;
+            animation: breathing 4s ease-in-out infinite;
+        }
+
+        /* Circuit lines */
+        .circuit-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .circuit-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            opacity: 0.4;
+            animation: circuitFlow 2s linear infinite;
+        }
+
+        /* Neural nodes */
+        .node {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--blue-deep);
+            border: 2px solid var(--cyan);
+            border-radius: 50%;
+            animation: nodePulse 2s ease-in-out infinite;
+            z-index: 10;
+        }
+
+        .node.active { background: var(--green); border-color: var(--green-glow); }
+        .node.processing { background: var(--cyan); border-color: var(--white); animation-duration: 0.5s; }
+        .node.warning { background: var(--amber); border-color: var(--orange); }
+        .node.error { background: var(--red); border-color: var(--magenta); animation: glitch 0.2s linear infinite; }
+
+        /* Data packets */
+        .data-packet {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--green);
+            z-index: 20;
+        }
+
+        /* ========== MAIN CONTAINER ========== */
+        .container {
+            position: relative;
+            z-index: 100;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ========== HEADER WITH NEURAL CORE ========== */
+        header {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        /* Neural Core - MAIN ANIMATED PIECE */
+        .neural-core {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .core-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2px solid transparent;
+        }
+
+        .core-ring.outer {
+            border-top-color: var(--cyan);
+            border-bottom-color: var(--blue);
+            animation: ringSpin 3s linear infinite;
+            box-shadow: 0 0 20px var(--cyan), inset 0 0 20px rgba(0,240,255,0.1);
+        }
+
+        .core-ring.middle {
+            inset: 15px;
+            border-left-color: var(--magenta);
+            border-right-color: var(--green);
+            animation: ringSpin 2s linear infinite reverse;
+        }
+
+        .core-ring.inner {
+            inset: 30px;
+            background: radial-gradient(circle, var(--blue-deep), var(--bg-deep));
+            border: 2px solid var(--cyan);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .core-label {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--cyan);
+            text-shadow: 0 0 10px var(--cyan);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        /* Circuit traces from core */
+        .circuit-trace {
+            position: absolute;
+            background: var(--cyan);
+            opacity: 0.6;
+            z-index: -1;
+        }
+
+        .trace-h1 { left: 75px; top: 75px; width: 200px; height: 2px; animation: circuitFlow 1.5s linear infinite; }
+        .trace-h2 { left: 75px; bottom: 75px; width: 200px; height: 2px; animation: circuitFlow 1.5s linear infinite 0.3s; }
+        .trace-v1 { top: 75px; left: 75px; width: 2px; height: 200px; animation: circuitFlow 1.5s linear infinite 0.6s; }
+        .trace-v2 { top: 75px; right: 75px; width: 2px; height: 200px; animation: circuitFlow 1.5s linear infinite 0.9s; }
+
+        /* Title area */
+        .title-area {
+            flex: 1;
+        }
+
+        .main-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--cyan), var(--magenta), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 3s ease-in-out infinite;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: var(--gray);
+            letter-spacing: 3px;
+        }
+
+        /* Stats dashboard */
+        .stats-grid {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 18px;
+            min-width: 100px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--cyan);
+            box-shadow: 0 0 15px rgba(0,240,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--cyan);
+        }
+
+        .stat-value.green { color: var(--green); }
+        .stat-value.red { color: var(--red); }
+        .stat-value.amber { color: var(--amber); }
+        .stat-value.gold { color: var(--gold); }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ========== CONTROLS ========== */
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .file-input { display: none; }
+
+        .btn {
+            padding: 14px 28px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-glass);
+            color: var(--white);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            border-color: var(--cyan);
+            box-shadow: 0 0 20px rgba(0,240,255,0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn.primary {
+            background: linear-gradient(135deg, var(--blue-deep), var(--blue));
+            border-color: var(--cyan);
+        }
+
+        .btn.primary:hover {
+            background: linear-gradient(135deg, var(--blue), var(--cyan));
+            box-shadow: 0 0 30px var(--cyan);
+        }
+
+        /* ========== TABS ========== */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            background: var(--bg-panel);
+            padding: 6px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: var(--gray);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab:hover { color: var(--white); }
+
+        .tab.active {
+            background: var(--bg-glass);
+            color: var(--cyan);
+            border: 1px solid var(--cyan);
+            box-shadow: 0 0 15px rgba(0,240,255,0.3);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ========== RESULTS GRID ========== */
+        .results-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .result-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .result-card:hover {
+            border-color: var(--cyan);
+            box-shadow: 0 0 25px rgba(0,240,255,0.3);
+            transform: scale(1.01);
+        }
+
+        .result-card.valid { border-left: 4px solid var(--green); }
+        .result-card.invalid { border-left: 4px solid var(--red); opacity: 0.7; }
+        .result-card.processing { border-left: 4px solid var(--cyan); animation: pulse 1s infinite; }
+
+        /* Card header */
+        .card-header {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-deep);
+            border-radius: 50%;
+            font-size: 16px;
+        }
+
+        .card-info { flex: 1; }
+
+        .card-email {
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .card-status {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            text-transform: uppercase;
+        }
+
+        .card-status.valid { background: var(--green); color: var(--bg-deep); }
+        .card-status.invalid { background: var(--red); color: var(--white); }
+        .card-status.processing { background: var(--cyan); color: var(--bg-deep); }
+
+        .card-balance {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        /* Card body */
+        .card-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease-out;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .card-body.expanded {
+            max-height: 400px;
+            padding: 15px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .detail-label { color: var(--gray); font-size: 12px; }
+        .detail-value { color: var(--white); font-weight: 500; }
+
+        /* ========== LOADING STATE ========== */
+        .loading-state {
+            text-align: center;
+            padding: 60px;
+            color: var(--gray);
+        }
+
+        .loading-core {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            border: 3px solid var(--border);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: ringSpin 1s linear infinite;
+        }
+
+        /* ========== HIGH BALANCE SECTION ========== */
+        .high-balance-section {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(0,255,136,0.1));
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            display: none;
+        }
+
+        .high-balance-section.visible { display: block; }
+
+        .hb-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            color: var(--gold);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hb-list { display: flex; flex-direction: column; gap: 10px; }
+
+        .hb-item {
+            padding: 15px;
+            background: var(--bg-glass);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .hb-item:hover { transform: translateX(5px); background: var(--bg-panel); }
+
+        .hb-balance {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            color: var(--green);
+            min-width: 100px;
+        }
+
+        .hb-email { flex: 1; color: var(--gray); }
+        .hb-phone { color: var(--cyan); }
+
+        .hb-copy {
+            padding: 8px 14px;
+            background: var(--blue-deep);
+            border: 1px solid var(--cyan);
+            border-radius: 4px;
+            color: var(--cyan);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .hb-copy:hover { background: var(--cyan); color: var(--bg-deep); }
+
+        /* ========== MODAL ========== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.visible { display: flex; }
+
+        .modal {
+            background: var(--bg-panel);
+            border: 2px solid var(--green);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 60px var(--green);
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .modal-icon { font-size: 60px; margin-bottom: 20px; }
+
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+
+        .modal-amount {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 48px;
+            color: var(--green);
+            margin: 20px 0;
+        }
+
+        .modal-email { color: var(--gray); margin-bottom: 30px; }
+
+        .modal-close {
+            padding: 14px 40px;
+            background: var(--green);
+            border: none;
+            border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            color: var(--bg-deep);
+            cursor: pointer;
+        }
+
+        .modal-close:hover { box-shadow: 0 0 30px var(--green); }
+
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--gray); }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .neural-core { width: 80px; height: 80px; }
+            .core-ring.inner { inset: 15px; }
+            .core-label { font-size: 14px; }
+            .main-title { font-size: 18px; }
+            header { flex-wrap: wrap; }
+            .stats-grid { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- NEURAL BACKGROUND -->
+    <div class="neural-bg" id="neuralBg">
+        <div class="grid-base"></div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <div class="modal-icon">💰</div>
+            <div class="modal-title">HIGH BALANCE ALERT!</div>
+            <div class="modal-amount" id="modalAmount">$0.00</div>
+            <div class="modal-email" id="modalEmail">email@example.com</div>
+            <button class="modal-close" onclick="closeModal()">AWESOME!</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <!-- NEURAL CORE -->
+            <div class="neural-core" id="neuralCore">
+                <div class="core-ring outer"></div>
+                <div class="core-ring middle"></div>
+                <div class="core-ring inner">
+                    <div class="core-label">BLUEMEANIE23</div>
+                </div>
+                <div class="circuit-trace trace-h1"></div>
+                <div class="circuit-trace trace-h2"></div>
+                <div class="circuit-trace trace-v1"></div>
+                <div class="circuit-trace trace-v2"></div>
+            </div>
+
+            <!-- TITLE -->
+            <div class="title-area">
+                <div class="main-title">LOTTERYWEST NEURAL CORE</div>
+                <div class="subtitle">▸ ELECTRIC ACCOUNT PROCESSING ORGANISM</div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statTotal">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value green" id="statValid">0</div>
+                        <div class="stat-label">Valid</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value red" id="statInvalid">0</div>
+                        <div class="stat-label">Invalid</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value green" id="statHighBal">0</div>
+                        <div class="stat-label">$50+</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTROLS -->
+        <div class="controls">
+            <label class="btn">
+                <input type="file" class="file-input" id="accountFile" accept=".txt">
+                📁 LOAD ACCOUNTS
+            </label>
+            <button class="btn primary" id="startBtn" onclick="toggleCheck()">
+                ▶ START NEURAL ENGINE
+            </button>
+            <button class="btn" onclick="exportData()">
+                💾 EXPORT
+            </button>
+            <button class="btn" onclick="clearResults()">
+                🗑 CLEAR
+            </button>
+        </div>
+
+        <!-- HIGH BALANCE SECTION -->
+        <div class="high-balance-section" id="hbSection">
+            <div class="hb-title">💰 HIGH BALANCE NODES ($50+)</div>
+            <div class="hb-list" id="hbList"></div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('results')">📊 NODES</button>
+            <button class="tab" onclick="switchTab('stats')">📈 STATS</button>
+            <button class="tab" onclick="switchTab('raw')">🔧 RAW</button>
+        </div>
+
+        <!-- RESULTS TAB -->
+        <div class="tab-content active" id="resultsTab">
+            <div class="results-grid" id="resultsGrid">
+                <div class="loading-state">
+                    <div class="loading-core"></div>
+                    <div>AWAITING NEURAL INPUT...</div>
+                    <div style="font-size: 12px; margin-top: 10px; color: var(--cyan);">Load accounts to begin processing</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATS TAB -->
+        <div class="tab-content" id="statsTab">
+            <div class="stat-card" style="width: 100%; margin-bottom: 20px;">
+                <div style="font-family: 'Orbitron'; font-size: 14px; color: var(--cyan); margin-bottom: 15px;">▸ SPENDING vs WINNINGS (12 MONTHS)</div>
+                <div style="display: flex; gap: 20px; justify-content: center;">
+                    <div>
+                        <div style="font-size: 28px; color: var(--red);" id="graphSpend">$0.00</div>
+                        <div style="font-size: 11px; color: var(--gray);">TOTAL SPENT</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 28px; color: var(--green);" id="graphWin">$0.00</div>
+                        <div style="font-size: 11px; color: var(--gray);">TOTAL WON</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RAW TAB -->
+        <div class="tab-content" id="rawTab">
+            <pre id="rawJson" style="background: var(--bg-glass); padding: 20px; border-radius: 8px; overflow: auto; max-height: 500px; font-size: 12px;"></pre>
+        </div>
+    </div>
+
+    <script>
+        // ========== STATE ==========
+        let accounts = [];
+        let results = [];
+        let checking = false;
+        let socket = null;
+        let pollInterval = null;
+
+        // ========== NEURAL BACKGROUND ==========
+        function initNeuralBg() {
+            const bg = document.getElementById('neuralBg');
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            
+            // Create nodes
+            for (let i = 0; i < 20; i++) {
+                const node = document.createElement('div');
+                node.className = 'node';
+                node.style.left = Math.random() * w + 'px';
+                node.style.top = Math.random() * h + 'px';
+                node.style.animationDelay = Math.random() * 2 + 's';
+                bg.appendChild(node);
+            }
+            
+            // Create circuit lines
+            for (let i = 0; i < 10; i++) {
+                const line = document.createElement('div');
+                line.className = 'circuit-line';
+                const horizontal = Math.random() > 0.5;
+                if (horizontal) {
+                    line.style.width = (100 + Math.random() * 200) + 'px';
+                    line.style.height = '2px';
+                    line.style.top = Math.random() * h + 'px';
+                } else {
+                    line.style.width = '2px';
+                    line.style.height = (100 + Math.random() * 200) + 'px';
+                    line.style.left = Math.random() * w + 'px';
+                }
+                line.style.animationDelay = Math.random() * 2 + 's';
+                bg.appendChild(line);
+            }
+        }
+
+        // ========== REACTIVE NEURAL CORE ==========
+        function updateNeuralCore() {
+            const valid = results.filter(r => r.status === 'valid' || r.status === 'VALID').length;
+            const invalid = results.filter(r => r.status === 'invalid' || r.status === 'INVALID').length;
+            const highBal = results.filter(r => {
+                if (!r.balance) return false;
+                const val = parseFloat(r.balance.replace(/[$,]/g, ''));
+                return val >= 50;
+            }).length;
+            const processing = results.filter(r => r.status === 'processing').length;
+            
+            document.getElementById('statTotal').textContent = results.length;
+            document.getElementById('statValid').textContent = valid;
+            document.getElementById('statInvalid').textContent = invalid;
+            document.getElementById('statHighBal').textContent = highBal;
+            
+            // Update core ring colors based on state
+            const core = document.getElementById('neuralCore');
+            if (processing > 0) {
+                core.querySelector('.middle').style.borderTopColor = 'var(--cyan)';
+                core.querySelector('.middle').style.borderBottomColor = 'var(--cyan)';
+            } else if (highBal > 0) {
+                core.querySelector('.middle').style.borderTopColor = 'var(--green)';
+                core.querySelector('.middle').style.borderBottomColor = 'var(--gold)';
+            } else if (valid > 0) {
+                core.querySelector('.middle').style.borderTopColor = 'var(--green)';
+                core.querySelector('.middle').style.borderBottomColor = 'var(--cyan)';
+            }
+        }
+
+        // ========== FILE HANDLING ==========
+        document.getElementById('accountFile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const text = await file.text();
+                accounts = text.split('\n').filter(line => line.trim() && line.includes(':'));
+                alert(`Loaded ${accounts.length} accounts`);
+            }
+        });
+
+        // ========== RENDER RESULTS ==========
+        function renderResults() {
+            const grid = document.getElementById('resultsGrid');
+            if (results.length === 0) {
+                grid.innerHTML = `<div class="loading-state"><div class="loading-core"></div><div>AWAITING NEURAL INPUT...</div><div style="font-size: 12px; margin-top: 10px; color: var(--cyan);">Load accounts to begin processing</div></div>`;
+                return;
+            }
+            
+            grid.innerHTML = results.map((r, i) => `
+                <div class="result-card ${r.status}" onclick="toggleCard(${i})">
+                    <div class="card-header">
+                        <div class="card-icon">${r.status === 'valid' ? '✓' : r.status === 'invalid' ? '✗' : '⟳'}</div>
+                        <div class="card-info">
+                            <div class="card-email">${r.email}</div>
+                            <span class="card-status ${r.status}">${r.status}</span>
+                        </div>
+                        <div class="card-balance">${r.balance || '$0.00'}</div>
+                    </div>
+                    <div class="card-body" id="card-${i}">
+                        <div class="detail-row"><span class="detail-label">Password</span><span class="detail-value">${r.password}</span></div>
+                        <div class="detail-row"><span class="detail-label">Balance</span><span class="detail-value">${r.balance || 'N/A'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Weekly Limit</span><span class="detail-value">${r.weekly_limit || 'N/A'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Phone</span><span class="detail-value">${r.phone || 'N/A'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Current Draws</span><span class="detail-value">${r.current_draws || '0'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Last Deposit</span><span class="detail-value">${r.last_deposit || 'N/A'} (${r.last_deposit_method || 'N/A'})</span></div>
+                        <div class="detail-row"><span class="detail-label">Total Spending</span><span class="detail-value">${r.total_spending || 'N/A'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Total Winnings</span><span class="detail-value">${r.total_winnings || 'N/A'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Cards</span><span class="detail-value">${r.cards || 'None'}</span></div>
+                        <div class="detail-row"><span class="detail-label">PayPal</span><span class="detail-value">${r.paypal || 'No'}</span></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleCard(i) {
+            document.getElementById('card-' + i).classList.toggle('expanded');
+        }
+
+        // ========== TABS ==========
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+        }
+
+        // ========== HIGH BALANCE ==========
+        function updateHighBalance() {
+            const hb = results.filter(r => {
+                if (!r.balance) return false;
+                return parseFloat(r.balance.replace(/[$,]/g, '')) >= 50;
+            });
+            
+            const section = document.getElementById('hbSection');
+            if (hb.length > 0) {
+                section.classList.add('visible');
+                document.getElementById('hbList').innerHTML = hb.map(r => `
+                    <div class="hb-item">
+                        <div class="hb-balance">${r.balance}</div>
+                        <div class="hb-email">${r.email}</div>
+                        <div class="hb-phone">${r.phone || ''}</div>
+                        <button class="hb-copy" onclick="copyCred('${r.email}','${r.password}')">COPY</button>
+                    </div>
+                `).join('');
+                
+                // Show modal for new high balance
+                if (hb.length > parseInt(document.getElementById('statHighBal').textContent || '0')) {
+                    const latest = hb[hb.length - 1];
+                    document.getElementById('modalAmount').textContent = latest.balance;
+                    document.getElementById('modalEmail').textContent = latest.email;
+                    document.getElementById('modal').classList.add('visible');
+                }
+            } else {
+                section.classList.remove('visible');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('visible');
+        }
+
+        function copyCred(email, pass) {
+            navigator.clipboard.writeText(email + ':' + pass);
+        }
+
+        // ========== STATS ==========
+        function updateStats() {
+            let spend = 0, win = 0;
+            results.forEach(r => {
+                if (r.total_spending) spend += parseFloat(r.total_spending.replace(/[$,]/g, '')) || 0;
+                if (r.total_winnings) win += parseFloat(r.total_winnings.replace(/[$,]/g, '')) || 0;
+            });
+            document.getElementById('graphSpend').textContent = '$' + spend.toFixed(2);
+            document.getElementById('graphWin').textContent = '$' + win.toFixed(2);
+            
+            // Raw JSON
+            document.getElementById('rawJson').textContent = JSON.stringify(results, null, 2);
+        }
+
+        // ========== START/STOP ==========
+        async function toggleCheck() {
+            if (checking) {
+                checking = false;
+                document.getElementById('startBtn').textContent = '▶ START NEURAL ENGINE';
+                return;
+            }
+            
+            if (accounts.length === 0) {
+                alert('Load accounts first!');
+                return;
+            }
+            
+            checking = true;
+            document.getElementById('startBtn').textContent = '⏹ STOP';
+            
+            // Try WebSocket
+            try {
+                socket = new WebSocket('ws://' + location.host + '/ws');
+                socket.onmessage = (e) => handleResult(JSON.parse(e.data));
+            } catch {
+                console.log('WebSocket not available, using polling');
+            }
+            
+            pollInterval = setInterval(fetchResults, 2000);
+            
+            for (let i = 0; i < accounts.length; i++) {
+                if (!checking) break;
+                const acc = accounts[i].split(':');
+                // Send to backend
+                if (socket && socket.readyState === 1) {
+                    socket.send(JSON.stringify({email: acc[0], password: acc[1]}));
+                }
+                await new Promise(r => setTimeout(r, 3000));
+            }
+            
+            checking = false;
+            document.getElementById('startBtn').textContent = '▶ START NEURAL ENGINE';
+        }
+
+        function handleResult(data) {
+            results.push(data);
+            const bal = parseFloat((data.balance || '$0').replace(/[$,]/g, ''));
+            if (bal >= 50) {
+                document.getElementById('modalAmount').textContent = data.balance;
+                document.getElementById('modalEmail').textContent = data.email;
+                document.getElementById('modal').classList.add('visible');
+            }
+            renderResults();
+            updateNeuralCore();
+            updateHighBalance();
+            updateStats();
+        }
+
+        async function fetchResults() {
+            try {
+                const r = await fetch('/api/results');
+                if (r.ok) {
+                    const data = await r.json();
+                    results = data.results || [];
+                    renderResults();
+                    updateNeuralCore();
+                    updateHighBalance();
+                    updateStats();
+                }
+            } catch {}
+        }
+
+        function clearResults() {
+            results = [];
+            renderResults();
+            updateNeuralCore();
+            updateHighBalance();
+            updateStats();
+        }
+
+        function exportData() {
+            const blob = new Blob([JSON.stringify(results, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'lotterywest_results.json';
+            a.click();
+        }
+
+        // ========== INIT ==========
+        initNeuralBg();
+    </script>
+</body>
+</html>

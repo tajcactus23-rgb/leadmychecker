@@ -1,0 +1,46 @@
+[
+  {
+    "email": "neopc00",
+    "password": "William_87192",
+    "status": "VALID",
+    "payment_terms": "COD",
+    "name": "NEO PC",
+    "phone": "",
+    "address": "",
+    "contacts": [
+      {
+        "name": "Peter Papaioannou",
+        "role": "Account Manager",
+        "phone": "08 8112 6005"
+      }
+    ],
+    "open_orders": [],
+    "shipped_orders": [],
+    "back_orders": [],
+    "outstanding": [],
+    "credit_cards": [],
+    "date_range": "2025-01-01 00:00:00 - 2026-05-12 00:00:00",
+    "timestamp": "2026-05-13T14:55:05.764250",
+    "proxy_used": null,
+    "fingerprint_id": "689a3dedc8cc343e"
+  },
+  {
+    "email": "astr20",
+    "password": "sAINTS@1965",
+    "status": "VALID",
+    "payment_terms": "COD",
+    "name": "NEVENA VOJINOVIC",
+    "phone": "",
+    "address": "",
+    "contacts": [],
+    "open_orders": [],
+    "shipped_orders": [],
+    "back_orders": [],
+    "outstanding": [],
+    "credit_cards": [],
+    "date_range": "2025-01-01 00:00:00 - 2026-05-12 00:00:00",
+    "timestamp": "2026-05-13T14:55:38.545061",
+    "proxy_used": null,
+    "fingerprint_id": "689a3dedc8cc343e"
+  }
+]

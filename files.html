@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Workspace Files - Download</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #030308; 
+            color: #e0e0ff; 
+            font-family: 'Courier New', monospace; 
+            padding: 30px;
+            min-height: 100vh;
+        }
+        h1 { 
+            color: #00f0ff; 
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: #0a0a15;
+            border: 1px solid #151525;
+            transition: all 0.3s;
+        }
+        .file-item:hover {
+            border-color: #00f0ff;
+            background: #0f0f20;
+        }
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .file-icon { font-size: 1.5rem; }
+        .file-name { 
+            color: #00ff66; 
+            font-size: 0.9rem;
+        }
+        .file-size { 
+            color: #404060; 
+            font-size: 0.75rem;
+        }
+        .download-btn {
+            padding: 8px 20px;
+            background: transparent;
+            border: 1px solid #00f0ff;
+            color: #00f0ff;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+        .download-btn:hover {
+            background: #00f0ff;
+            color: #030308;
+        }
+    </style>
+</head>
+<body>
+    <h1>📦 Workspace Files - Download</h1>
+    <div class="file-list" id="fileList"></div>
+    <script>
+    const files = [
+        {name: 'lotterywest_ui.html', size: '67KB', desc: 'Lotterywest - Neural Engine GUI'},
+        {name: 'lotterywest_checker.py', size: '16KB', desc: 'Lotterywest - Backend Script'},
+        {name: 'accounts_lotterywest.txt', size: '150B', desc: 'Test Accounts (4 accounts)'},
+    ];
+    
+    const list = document.getElementById('fileList');
+    files.forEach(f => {
+        list.innerHTML += `
+            <div class="file-item">
+                <div class="file-info">
+                    <span class="file-icon">📄</span>
+                    <div>
+                        <div class="file-name">${f.name}</div>
+                        <div class="file-size">${f.size} - ${f.desc}</div>
+                    </div>
+                </div>
+                <button class="download-btn" onclick="download('${f.name}')">Download</button>
+            </div>
+        `;
+    });
+    
+    async function download(filename) {
+        try {
+            const response = await fetch(filename);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch(e) {
+            // Fallback: open in new tab
+            window.open(filename, '_blank');
+        }
+    }
+    </script>
+</body>
+</html>
